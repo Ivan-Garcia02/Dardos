@@ -17,7 +17,6 @@ function App() {
   const [puntajeActual, setPuntajeActual] = useState<string>('');
   const [selected, setSelected] = useState(false);
   const [selected3, setSelected3] = useState(false);
-  const [next, setNext] = useState(false);
   const [ganador, setGanador] = useState<string | null>(null);
   const puntajeRef = useRef<HTMLInputElement>(null);
 
@@ -50,11 +49,12 @@ function App() {
     }
   }
 
-  function handlePuntajeSubmit() {
+  async function handlePuntajeSubmit() {
     let puntaje = selected ? parseInt(puntajeActual) * 2 : selected3 ? parseInt(puntajeActual) * 3 : parseInt(puntajeActual);
     if (isNaN(puntaje)) return;
+    let shouldSetNext = false;
 
-    setJugadores(prevJugadores => {
+    await setJugadores(prevJugadores => {
       return prevJugadores.map((jugador, index) => {
         if (index === turno) {
           const nuevaPuntuacion = jugador.puntuacion - puntaje;
@@ -62,7 +62,7 @@ function App() {
             setGanador(jugador.nombre);
           }
           if (nuevaPuntuacion < 0) {
-            setNext(true);
+            shouldSetNext = true;
           }
           return {
             ...jugador,
@@ -73,7 +73,7 @@ function App() {
       });
     });
 
-    if (tirada < 3 && !next) {
+    if (tirada < 3 && !shouldSetNext) {
       setTirada(tirada + 1);
     } else {
       setTurno((prevTurno) => (prevTurno + 1) % numJugadores);
@@ -169,6 +169,7 @@ function App() {
                     setSelected(!selected);
                     setSelected3(false);
                   }}
+                  sx={{mt: 1}}
                 >
                   2
                 </ToggleButton>
@@ -179,11 +180,12 @@ function App() {
                     setSelected3(!selected3);
                     setSelected(false);
                   }}
+                  sx={{mt: 1}}
                 >
                   3
                 </ToggleButton>
               </div>
-              <Button onClick={handlePuntajeSubmit} variant="contained">
+              <Button onClick={handlePuntajeSubmit} variant="contained" sx={{backgroundColor: '#3f41b5'}}>
                 Registrar Puntaje
               </Button>
 
